@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0a0a14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Swipe Galería</title>
+<style>
+:root{--bg:#0a0a14;--card:#161626;--fg:#f4f4fb;--mut:#8b8ba7;--del:#ff4d6d;--keep:#2ee59d;--later:#4da3ff;--star:#ffc247;--acc:linear-gradient(135deg,#7c5cff,#3ec8ff)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
+body{background:radial-gradient(900px 500px at 10% -10%,#2a1f5c55,transparent),radial-gradient(700px 500px at 100% 0%,#0e3a5c55,transparent),var(--bg);background-attachment:fixed}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{min-height:100vh;padding:calc(env(safe-area-inset-top) + 18px) 16px calc(92px + env(safe-area-inset-bottom));max-width:900px;margin:0 auto}
+h1{margin:0;font-size:30px;letter-spacing:-.5px}
+.sub{margin:4px 0 0;color:var(--mut);font-size:14px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:16px}
+.adds{display:flex;gap:10px;margin-bottom:18px}
+.btn{flex:1;padding:14px 12px;border-radius:16px;border:1px solid #ffffff1c;background:#ffffff0f;font-weight:600;font-size:15px;backdrop-filter:blur(10px)}
+.btn.pri{background:var(--acc);border:0;color:#fff;box-shadow:0 8px 24px #5b6bff55}
+.btn.danger{background:var(--del);border:0;color:#fff}
+.btn:active{transform:scale(.97)}
+.chip{padding:8px 14px;border-radius:999px;border:1px solid #ffffff1c;background:#ffffff0f;font-size:13px;white-space:nowrap}
+.chip.pri,.chip.on{background:var(--acc);border:0;color:#fff}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(min-width:600px){.fgrid{grid-template-columns:repeat(3,1fr)}}
+.fc{background:var(--card);border-radius:22px;overflow:hidden;cursor:pointer;box-shadow:0 10px 30px #0006;border:1px solid #ffffff10;transition:transform .15s}
+.fc:active{transform:scale(.97)}
+.fc .cv{aspect-ratio:1;position:relative;background:#1d1d30}
+.fc .cv img{width:100%;height:100%;object-fit:cover;display:block}
+.fc .cv:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#000a)}
+.fc .n{position:absolute;right:10px;bottom:8px;z-index:1;font-size:12px;font-weight:700;background:#0008;padding:3px 9px;border-radius:999px}
+.fc .info{padding:10px 12px 12px}
+.fc .nm{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg{height:5px;background:#ffffff14;border-radius:9px;margin-top:8px;overflow:hidden}
+.pg i{display:block;height:100%;background:var(--acc);border-radius:9px}
+.pgt{font-size:11px;color:var(--mut);margin-top:5px}
+.empty{text-align:center;padding:60px 20px;color:var(--mut)}
+.empty .big{font-size:64px;margin-bottom:10px}
+.empty p{line-height:1.5}
+.hd{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.back{width:42px;height:42px;border-radius:50%;border:1px solid #ffffff1c;background:#ffffff0f;font-size:20px;flex:none}
+.hd h2{margin:0;font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+@media(min-width:600px){.grid3{grid-template-columns:repeat(5,1fr)}}
+.th{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#1d1d30;cursor:pointer}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.bd{position:absolute;right:5px;top:5px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#000;box-shadow:0 2px 6px #0007}
+.scard{display:flex;align-items:center;gap:14px;padding:16px;border-radius:20px;background:var(--card);border:1px solid #ffffff10;margin-bottom:12px;cursor:pointer;width:100%;text-align:left}
+.scard .ic{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:24px;color:#000;flex:none}
+.scard b{font-size:17px;display:block}
+.scard span{color:var(--mut);font-size:13px}
+.scard .ct{margin-left:auto;font-size:26px;font-weight:800}
+.link{background:none;border:0;color:var(--mut);text-decoration:underline;font-size:13px;margin-top:10px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#0a0a14dd;backdrop-filter:blur(18px);border-top:1px solid #ffffff12;z-index:5}
+nav button{flex:1;max-width:220px;padding:11px;border-radius:14px;border:0;background:transparent;color:var(--mut);font-weight:600;font-size:14px}
+nav button.on{background:#ffffff14;color:#fff}
+.sw{position:fixed;inset:0;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 10px) 0 0;background:var(--bg);z-index:10}
+.sbar{display:flex;align-items:center;gap:10px;padding:0 14px}
+.sbar .mid{flex:1;text-align:center;min-width:0}
+.sbar .mid b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbar .mid span{font-size:12px;color:var(--mut)}
+.prog{height:4px;background:#ffffff14;margin:10px 14px 0;border-radius:9px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--acc)}
+.stack{flex:1;position:relative;margin:12px 14px 6px}
+.card{position:absolute;inset:0;border-radius:28px;overflow:hidden;background:#000;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 20px 50px #0008;cursor:grab}
+.card.back{transform:scale(.94) translateY(14px);opacity:.65;pointer-events:none}
+.card img.bg{position:absolute;inset:-24px;width:calc(100% + 48px);height:calc(100% + 48px);object-fit:cover;filter:blur(30px) brightness(.45)}
+.card img.fg{position:relative;width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
+.stamp{position:absolute;top:22px;left:50%;transform:translateX(-50%);padding:7px 18px;border:3px solid;border-radius:14px;font-weight:900;letter-spacing:2px;font-size:22px;opacity:0;background:#000a;white-space:nowrap;pointer-events:none}
+.cur{position:absolute;left:14px;bottom:14px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;color:#000}
+.hint{text-align:center;color:var(--mut);font-size:12px;padding:4px 14px}
+.actions{display:flex;justify-content:space-around;padding:8px 6px calc(14px + env(safe-area-inset-bottom))}
+.ac{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;font-size:11px;color:var(--mut);font-weight:600}
+.ac i{width:62px;height:62px;border-radius:50%;border:2px solid;display:grid;place-items:center;font-style:normal;font-size:26px;background:#ffffff0d}
+.ac:active i{transform:scale(.9)}
+.done{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px;gap:12px}
+.done .big{font-size:72px}
+.done .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.done .btn{flex:none;min-width:200px}
+#toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#222238;border:1px solid #ffffff22;padding:10px 18px;border-radius:999px;font-size:14px;z-index:30;display:none;max-width:90vw;text-align:center}
+#modal{position:fixed;inset:0;background:#000a;display:none;align-items:flex-end;justify-content:center;z-index:40}
+.sheet{width:100%;max-width:520px;background:#181830;border-radius:26px 26px 0 0;padding:22px 18px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+.sheet h3{margin:0;font-size:20px}
+.sheet p{margin:0 0 6px;color:#c9c9de;line-height:1.5;font-size:14px}
+.sheet .btn{flex:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="nav">
+  <button data-act="nav" data-v="home">🖼️ Galería</button>
+  <button data-act="nav" data-v="summary">📊 Resumen</button>
+</nav>
+<div id="toast"></div>
+<div id="modal"></div>
+<input type="file" id="fFiles" accept="image/*" multiple hidden>
+<input type="file" id="fDir" webkitdirectory multiple hidden>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DEC={
+  delete:{name:'Para eliminar',label:'ELIMINAR',color:'var(--del)',icon:'✕'},
+  keep:{name:'Mantenidas',label:'MANTENER',color:'var(--keep)',icon:'✓'},
+  later:{name:'Analizar luego',label:'ANALIZAR',color:'var(--later)',icon:'⏳'},
+  star:{name:'Importantes',label:'IMPORTANTE',color:'var(--star)',icon:'★'}
+};
+const DIR2DEC={left:'delete',right:'keep',up:'later',down:'star'};
+const IMG_RE=/\.(jpe?g|png|webp|gif|heic|heif|avif|bmp)$/i;
+
+let decisions={};
+try{decisions=JSON.parse(localStorage.getItem('swipe_dec')||'{}')}catch(e){}
+const save=()=>{try{localStorage.setItem('swipe_dec',JSON.stringify(decisions))}catch(e){}};
+
+const S={view:'home',photos:[],ids:new Set(),cur:null,filter:'all',queue:[],qi:0,hist:[],busy:false,scroll:0,install:false,deferred:null};
+
+/* ---------- datos ---------- */
+const monthLabel=t=>{const s=new Date(t||Date.now()).toLocaleDateString('es',{month:'long',year:'numeric'});return s.charAt(0).toUpperCase()+s.slice(1)};
+function addFile(f,folder,dir){
+  if(!(f.type.startsWith('image/')||IMG_RE.test(f.name)))return false;
+  const id=folder+'/'+f.name+'|'+f.size+'|'+f.lastModified;
+  if(S.ids.has(id))return false;
+  S.ids.add(id);
+  S.photos.push({id,name:f.name,folder,file:f,dir,date:f.lastModified||0,url:null});
+  return true;
+}
+const src=p=>p.url||(p.url=URL.createObjectURL(p.file));
+const byDate=(a,b)=>b.date-a.date||a.name.localeCompare(b.name);
+function folders(){
+  const m=new Map();
+  for(const p of S.photos){
+    let f=m.get(p.folder);
+    if(!f){f={name:p.folder,photos:[],latest:0};m.set(p.folder,f)}
+    f.photos.push(p);
+    if(p.date>f.latest)f.latest=p.date;
+  }
+  const a=[...m.values()];
+  a.forEach(f=>f.photos.sort(byDate));
+  a.sort((x,y)=>y.latest-x.latest);
+  return a;
+}
+const folderPhotos=name=>S.photos.filter(p=>p.folder===name).sort(byDate);
+function curList(){
+  if(!S.cur)return[];
+  if(S.cur.cat)return S.photos.filter(p=>decisions[p.id]===S.cur.cat).sort(byDate);
+  const L=folderPhotos(S.cur.name);
+  if(S.filter==='all')return L;
+  if(S.filter==='none')return L.filter(p=>!decisions[p.id]);
+  return L.filter(p=>decisions[p.id]===S.filter);
+}
+const shortName=n=>n.split('/').pop()||n;
+
+/* ---------- utilidades UI ---------- */
+let tt;
+function toast(msg,ms=2200){
+  const t=$('#toast');clearTimeout(tt);
+  if(!msg){t.style.display='none';return}
+  t.textContent=msg;t.style.display='block';
+  tt=setTimeout(()=>t.style.display='none',ms);
+}
+function modal(title,msg,btns){
+  const m=$('#modal');
+  m.innerHTML=`<div class="sheet"><h3>${esc(title)}</h3><p>${esc(msg)}</p>${btns.map((b,i)=>`<button class="btn ${b.cls||''}" data-i="${i}">${esc(b.t)}</button>`).join('')}</div>`;
+  m.style.display='flex';
+  m.onclick=e=>{
+    const b=e.target.closest('[data-i]');
+    if(b){m.style.display='none';const f=btns[b.dataset.i].fn;f&&f()}
+    else if(e.target===m)m.style.display='none';
+  };
+}
+const vibe=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
+
+/* ---------- vistas ---------- */
+function homeView(){
+  const fs=folders(),total=S.photos.length,done=S.photos.filter(p=>decisions[p.id]).length;
+  let h=`<div class="top"><div><h1>Galería</h1><p class="sub">${total?`${total} fotos · ${done} clasificadas`:'Elige tus fotos para empezar'}</p></div>${S.install?'<button class="chip pri" data-act="install">⬇ Instalar</button>':''}</div>`;
+  h+=`<div class="adds"><button class="btn pri" data-act="add">📷 Elegir fotos</button><button class="btn" data-act="adddir">📁 Abrir carpeta</button></div>`;
+  if(!fs.length){
+    h+=`<div class="empty"><div class="big">🖼️</div><p><b>Aún no hay fotos</b></p><p>Toca “Elegir fotos” y selecciona las que quieras revisar. Se agrupan por mes, como en una galería.<br><br>Tus decisiones se guardan: si cierras la app y vuelves a elegir las mismas fotos, se restauran.</p></div>`;
+  }else{
+    h+=`<div class="fgrid">`+fs.map(f=>{
+      const d=f.photos.filter(p=>decisions[p.id]).length,pc=Math.round(d/f.photos.length*100);
+      return `<div class="fc" data-act="open" data-f="${esc(f.name)}"><div class="cv"><img loading="lazy" src="${src(f.photos[0])}" alt=""><span class="n">${f.photos.length}</span></div><div class="info"><div class="nm" title="${esc(f.name)}">${esc(shortName(f.name))}</div><div class="pg"><i style="width:${pc}%"></i></div><div class="pgt">${d} de ${f.photos.length} revisadas</div></div></div>`;
+    }).join('')+`</div>`;
+  }
+  return h;
+}
+function badge(p){
+  const d=decisions[p.id];if(!d)return'';
+  return `<span class="bd" style="background:${DEC[d].color}">${DEC[d].icon}</span>`;
+}
+function folderView(){
+  const cat=S.cur.cat,list=curList();
+  const title=cat?`${DEC[cat].icon} ${DEC[cat].name}`:shortName(S.cur.name);
+  let h=`<div class="hd"><button class="back" data-act="back">‹</button><div style="min-width:0"><h2>${esc(title)}</h2><p class="sub" style="margin:0">${list.length} fotos</p></div></div>`;
+  if(!cat){
+    const all=folderPhotos(S.cur.name);
+    const cnt=k=>k==='all'?all.length:k==='none'?all.filter(p=>!decisions[p.id]).length:all.filter(p=>decisions[p.id]===k).length;
+    const fl=[['all','Todas'],['none','Pendientes'],['keep','✓ Mantener'],['delete','✕ Eliminar'],['later','⏳ Analizar'],['star','★ Importante']];
+    h+=`<div class="chips">${fl.map(([k,l])=>`<button class="chip ${S.filter===k?'on':''}" data-act="filter" data-k="${k}">${l} · ${cnt(k)}</button>`).join('')}</div>`;
+  }
+  if(list.length){
+    h+=`<div class="adds"><button class="btn pri" data-act="review">▶ Revisar una por una</button>${cat==='delete'?'<button class="btn danger" data-act="purge">🗑 Eliminar</button>':''}</div>`;
+    h+=`<div class="grid3">`+list.map((p,i)=>`<div class="th" data-act="thumb" data-i="${i}"><img loading="lazy" decoding="async" src="${src(p)}" alt="" onerror="this.style.opacity=.15">${badge(p)}</div>`).join('')+`</div>`;
+  }else{
+    h+=`<div class="empty"><div class="big">✨</div><p>No hay fotos aquí.</p></div>`;
+  }
+  return h;
+}
+function summaryView(){
+  const total=S.photos.length,pend=S.photos.filter(p=>!decisions[p.id]).length;
+  let h=`<div class="top"><div><h1>Resumen</h1><p class="sub">${total} fotos cargadas · ${pend} pendientes</p></div></div>`;
+  for(const k of ['delete','later','star','keep']){
+    const c=S.photos.filter(p=>decisions[p.id]===k).length;
+    h+=`<button class="scard" data-act="cat" data-k="${k}"><div class="ic" style="background:${DEC[k].color}">${DEC[k].icon}</div><div><b>${DEC[k].name}</b><span>Toca para ver y cambiar</span></div><div class="ct">${c}</div></button>`;
+  }
+  h+=`<button class="link" data-act="reset">Borrar todas las decisiones guardadas</button>`;
+  return h;
+}
+function swipeView(){
+  const q=S.queue;
+  if(S.qi>=q.length)return doneView();
+  const p=q[S.qi],n=q[S.qi+1],d=decisions[p.id];
+  const top=`<div class="sbar"><button class="back" data-act="back">✕</button><div class="mid"><b>${esc(S.cur&&S.cur.cat?DEC[S.cur.cat].name:shortName(S.cur?S.cur.name:''))}</b><span>${S.qi+1} / ${q.length}</span></div><button class="back" data-act="undo" title="Deshacer">↶</button></div><div class="prog"><i style="width:${Math.round(S.qi/q.length*100)}%"></i></div>`;
+  const stack=`<div class="stack">${n?`<div class="card back"><img class="bg" src="${src(n)}" alt=""><img class="fg" src="${src(n)}" alt=""></div>`:''}<div class="card" id="card"><img class="bg" src="${src(p)}" alt=""><img class="fg" src="${src(p)}" alt=""><div class="stamp"></div>${d?`<span class="cur" style="background:${DEC[d].color}">${DEC[d].icon} ${DEC[d].name}</span>`:''}</div></div>`;
+  const btn=(dir,k,lab,arrow)=>`<button class="ac" data-act="fly" data-d="${dir}"><i style="border-color:${DEC[k].color};color:${DEC[k].color}">${DEC[k].icon}</i>${arrow} ${lab}</button>`;
+  return `<div class="sw">${top}${stack}<div class="hint">Desliza la foto o usa los botones</div><div class="actions">${btn('left','delete','Eliminar','←')}${btn('up','later','Analizar','↑')}${btn('down','star','Importante','↓')}${btn('right','keep','Mantener','→')}</div></div>`;
+}
+function doneView(){
+  return `<div class="sw"><div class="sbar"><button class="back" data-act="back">‹</button><div class="mid"><b>Terminado</b></div><button class="back" data-act="undo" title="Deshacer">↶</button></div><div class="done"><div class="big">🎉</div><h2 style="margin:0">¡Lista revisada!</h2><p class="sub">Puedes deshacer la última, volver o ver el resumen.</p><div class="row"><button class="btn pri" data-act="back">Volver</button><button class="btn" data-act="tosummary">Ver resumen</button></div></div></div>`;
+}
+
+function render(){
+  const a=$('#app'),v=S.view;
+  a.innerHTML=v==='home'?homeView():v==='folder'?folderView():v==='summary'?summaryView():swipeView();
+  $('#nav').style.display=v==='swipe'?'none':'flex';
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===(v==='summary'?'summary':'home')));
+  if(v==='swipe')bindCard();
+}
+
+/* ---------- gestos ---------- */
+function dirOf(dx,dy){
+  const ax=Math.abs(dx),ay=Math.abs(dy);
+  if(Math.max(ax,ay)<90)return null;
+  return ax>ay?(dx<0?'left':'right'):(dy<0?'up':'down');
+}
+function stampFor(c,dx,dy,force){
+  const ax=Math.abs(dx),ay=Math.abs(dy),m=Math.max(ax,ay),s=c.querySelector('.stamp');
+  if(m<20&&!force){s.style.opacity=0;c.style.boxShadow='';return}
+  const dir=ax>ay?(dx<0?'left':'right'):(dy<0?'up':'down'),d=DEC[DIR2DEC[dir]];
+  s.textContent=d.icon+' '+d.label;s.style.color=d.color;s.style.borderColor=d.color;
+  s.style.opacity=force?1:Math.min(1,m/90);
+  c.style.boxShadow=`0 0 0 4px ${d.color}, 0 20px 50px #0008`;
+}
+function bindCard(){
+  const c=$('#card');if(!c)return;
+  let sx=0,sy=0,on=false;
+  c.addEventListener('pointerdown',e=>{if(S.busy)return;on=true;sx=e.clientX;sy=e.clientY;c.setPointerCapture(e.pointerId);c.style.transition='none'});
+  c.addEventListener('pointermove',e=>{
+    if(!on)return;
+    const dx=e.clientX-sx,dy=e.clientY-sy;
+    c.style.transform=`translate(${dx}px,${dy}px) rotate(${dx/18}deg)`;
+    stampFor(c,dx,dy);
+  });
+  const end=e=>{
+    if(!on)return;on=false;
+    const dir=dirOf(e.clientX-sx,e.clientY-sy);
+    if(dir)fly(dir);
+    else{c.style.transition='transform .25s';c.style.transform='';stampFor(c,0,0)}
+  };
+  c.addEventListener('pointerup',end);
+  c.addEventListener('pointercancel',end);
+}
+function fly(dir){
+  const c=$('#card');if(!c||S.busy)return;
+  S.busy=true;
+  const V={left:[-1,0],right:[1,0],up:[0,-1],down:[0,1]}[dir];
+  stampFor(c,V[0]*100,V[1]*100,true);
+  c.style.transition='transform .32s ease-in,opacity .32s';
+  c.style.transform=`translate(${V[0]*innerWidth*1.3}px,${V[1]*innerHeight*1.1}px) rotate(${V[0]*28}deg)`;
+  c.style.opacity='0';
+  setTimeout(()=>{S.busy=false;commit(DIR2DEC[dir])},300);
+}
+function commit(dec){
+  const p=S.queue[S.qi];if(!p)return;
+  S.hist.push({id:p.id,prev:decisions[p.id],qi:S.qi});
+  decisions[p.id]=dec;save();vibe(15);
+  S.qi++;
+  const nx=S.queue[S.qi+1];if(nx){const im=new Image();im.src=src(nx)}
+  render();
+}
+function undo(){
+  const h=S.hist.pop();
+  if(!h){toast('Nada que deshacer');return}
+  if(h.prev)decisions[h.id]=h.prev;else delete decisions[h.id];
+  save();S.qi=h.qi;render();
+}
+
+/* ---------- navegación ---------- */
+function openFolder(name){S.cur={name};S.filter='all';S.view='folder';history.pushState(null,'');render();scrollTo(0,0)}
+function startReview(list,i){
+  S.scroll=scrollY;S.queue=list.slice();S.qi=i;S.hist=[];S.view='swipe';
+  history.pushState(null,'');render();
+}
+function goBack(){history.back()}
+addEventListener('popstate',()=>{
+  if(S.view==='swipe'){S.view=S.cur?'folder':'home';render();scrollTo(0,S.scroll||0)}
+  else if(S.view==='folder'){S.view=S.cur&&S.cur.cat?'summary':'home';render();scrollTo(0,0)}
+});
+
+/* ---------- eliminar ---------- */
+const purgeList=()=>S.photos.filter(p=>decisions[p.id]==='delete');
+function purge(){
+  const L=purgeList();if(!L.length)return toast('No hay fotos marcadas');
+  const real=L.filter(p=>p.dir),fake=L.length-real.length;
+  let msg=`Hay ${L.length} fotos marcadas para eliminar.`;
+  if(real.length)msg+=` ${real.length} se pueden borrar de verdad del dispositivo (no van a la papelera).`;
+  if(fake)msg+=` ${fake} se eligieron con el selector del navegador y la web no puede borrarlas: copia la lista y bórralas tú en tu galería.`;
+  modal('Eliminar fotos',msg,[
+    real.length?{t:`Borrar ${real.length} ahora`,cls:'danger',fn:doPurge}:null,
+    {t:'Copiar lista de nombres',fn:copyList},
+    {t:'Cancelar'}
+  ].filter(Boolean));
+}
+async function doPurge(){
+  let ok=0,bad=0;
+  for(const p of purgeList().filter(p=>p.dir)){
+    try{
+      await p.dir.removeEntry(p.name);ok++;
+      if(p.url)URL.revokeObjectURL(p.url);
+      S.photos=S.photos.filter(x=>x!==p);delete decisions[p.id];S.ids.delete(p.id);
+    }catch(e){bad++}
+  }
+  save();toast(`${ok} borradas${bad?` · ${bad} con error`:''}`,3500);render();
+}
+async function copyList(){
+  const txt=purgeList().map(p=>p.folder+'/'+p.name).join('\n');
+  try{await navigator.clipboard.writeText(txt);toast('Lista copiada')}
+  catch(e){
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='fotos-para-eliminar.txt';a.click();
+    toast('Lista descargada');
+  }
+}
+
+/* ---------- cargar fotos ---------- */
+$('#fFiles').onchange=e=>{
+  let n=0;
+  for(const f of e.target.files)if(addFile(f,monthLabel(f.lastModified),null))n++;
+  e.target.value='';toast(n+' fotos añadidas');render();
+};
+$('#fDir').onchange=e=>{
+  let n=0;
+  for(const f of e.target.files){
+    const parts=(f.webkitRelativePath||'').split('/');parts.pop();
+    const folder=parts.length?parts.join('/'):monthLabel(f.lastModified);
+    if(addFile(f,folder,null))n++;
+  }
+  e.target.value='';toast(n+' fotos añadidas');render();
+};
+async function openDir(){
+  if(!window.showDirectoryPicker){$('#fDir').click();return}
+  try{
+    const root=await showDirectoryPicker({mode:'readwrite'});
+    toast('Leyendo carpeta…',60000);
+    let n=0;
+    const walk=async(dh,path)=>{
+      for await(const [name,h] of dh.entries()){
+        if(h.kind==='file'){
+          if(!IMG_RE.test(name))continue;
+          const f=await h.getFile();
+          if(addFile(f,path,dh))n++;
+        }else await walk(h,path+'/'+name);
+      }
+    };
+    await walk(root,root.name);
+    toast(n+' fotos añadidas');render();
+  }catch(e){
+    if(e.name==='AbortError')toast('');else toast('No se pudo abrir la carpeta');
+  }
+}
+
+/* ---------- eventos ---------- */
+$('#app').addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act;
+  if(a==='add')$('#fFiles').click();
+  else if(a==='adddir')openDir();
+  else if(a==='open')openFolder(t.dataset.f);
+  else if(a==='back')goBack();
+  else if(a==='filter'){S.filter=t.dataset.k;render()}
+  else if(a==='review'){
+    const L=curList();let i=0;
+    if(!S.cur.cat&&S.filter==='all'){const j=L.findIndex(p=>!decisions[p.id]);i=j<0?0:j}
+    startReview(L,i);
+  }
+  else if(a==='thumb')startReview(curList(),+t.dataset.i);
+  else if(a==='cat'){S.cur={cat:t.dataset.k};S.view='folder';history.pushState(null,'');render();scrollTo(0,0)}
+  else if(a==='purge')purge();
+  else if(a==='undo')undo();
+  else if(a==='fly')fly(t.dataset.d);
+  else if(a==='tosummary'){S.view='summary';S.cur=null;render()}
+  else if(a==='reset')modal('Borrar decisiones','Se borrarán todas las clasificaciones guardadas (no se borra ninguna foto).',[{t:'Borrar decisiones',cls:'danger',fn:()=>{decisions={};save();render();toast('Decisiones borradas')}},{t:'Cancelar'}]);
+  else if(a==='install'&&S.deferred){S.deferred.prompt();S.deferred=null;S.install=false;render()}
+});
+$('#nav').addEventListener('click',e=>{
+  const t=e.target.closest('[data-act="nav"]');if(!t)return;
+  S.view=t.dataset.v;S.cur=null;render();scrollTo(0,0);
+});
+addEventListener('keydown',e=>{
+  if(S.view!=='swipe')return;
+  const m={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[e.key];
+  if(m){e.preventDefault();fly(m)}
+  else if(e.key==='z'||e.key==='Backspace')undo();
+  else if(e.key==='Escape')goBack();
+});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();S.deferred=e;S.install=true;if(S.view==='home')render()});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
+render();
+</script>
+</body>
+</html>
